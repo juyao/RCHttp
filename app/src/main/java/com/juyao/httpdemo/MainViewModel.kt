@@ -1,5 +1,6 @@
 package com.juyao.httpdemo
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.juyao.http.service.ServiceCreator
 import com.juyao.http.viewmodel.ViewModelX
@@ -24,8 +25,28 @@ class MainViewModel: ViewModelX(){
                 {
                     service.getBanners()
                 },
-                bannerData
+                bannerData,
+            {
+                //这里自行处理异常
+                Log.i("MainViewModel","请求出现异常：${it.message}")
+            }
         )
     }
+
+//    /**
+//     * 获取banner数据
+//     */
+//    fun getBanners(){
+//        apiRequest(
+//            {
+//                service.getBanners()
+//            },
+//            {
+//                //这里直接拿到想要请求的数据
+//                Log.i("MainViewModel","请求到Banner数据list：$it")
+//            }
+//        )
+//    }
+
 
 }
