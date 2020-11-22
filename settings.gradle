@@ -1,0 +1,3 @@
+include ':http'
+include ':app'
+rootProject.name = "HttpDemo"
