@@ -26,9 +26,9 @@ dependencies {
 在Application的onCreate方法里进行初始化：
 
 ```kotlin
-ServiceCreator.init("https://gank.io/",ArrayList(),ArrayList())
+ServiceCreator.init("baseurl/",ArrayList(),ArrayList())
 ```
-
+不要忘了加"/"
 后面两个拦截器参数如果不需要自定义，就传两个空数组（非null）
 
 创建实体类，继承ResponseX
