@@ -17,7 +17,7 @@ allprojects {
 
 ```groovy
 dependencies {
-	        implementation 'com.github.juyao:RCHttp:V1.0.0'
+	        implementation 'com.github.juyao:RCHttp:v1.0.2'
 	}
 ```
 
