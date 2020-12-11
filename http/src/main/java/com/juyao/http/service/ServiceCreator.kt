@@ -1,11 +1,11 @@
 package com.juyao.http.service
 
-import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.util.ArrayList
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 
@@ -19,10 +19,10 @@ import java.util.concurrent.TimeUnit
 
 class ServiceCreator {
     companion object{
-        private const val CALL_TIME_OUT = 30 * 1000L
-        private const val CONNECT_TIME_OUT = 30 * 1000L
-        private const val READ_TIME_OUT = 30 * 1000L
-        private const val WRITE_TIME_OUT = 30 * 1000L
+        private const val CALL_TIME_OUT = 10L
+        private const val CONNECT_TIME_OUT = 10L
+        private const val READ_TIME_OUT = 10L
+        private const val WRITE_TIME_OUT = 10L
         private var baseUrl: String = ""
         private val interceptors: ArrayList<Interceptor> = ArrayList()
         private val networkInterceptors: ArrayList<Interceptor> = ArrayList()
@@ -43,13 +43,16 @@ class ServiceCreator {
             for (networkInterceptor in networkInterceptors) {
                 builder.addNetworkInterceptor(networkInterceptor)
             }
-            builder.callTimeout(CALL_TIME_OUT, TimeUnit.MILLISECONDS)
-            builder.connectTimeout(CONNECT_TIME_OUT, TimeUnit.MILLISECONDS)
-            builder.readTimeout(READ_TIME_OUT, TimeUnit.MILLISECONDS)
-            builder.writeTimeout(WRITE_TIME_OUT, TimeUnit.MILLISECONDS)
+            builder.callTimeout(CALL_TIME_OUT, TimeUnit.MINUTES)
+            builder.connectTimeout(CONNECT_TIME_OUT, TimeUnit.MINUTES)
+            builder.readTimeout(READ_TIME_OUT, TimeUnit.MINUTES)
+            builder.writeTimeout(WRITE_TIME_OUT, TimeUnit.MINUTES)
+            val gson = GsonBuilder()
+                    .setLenient()
+                    .create()
             Retrofit.Builder()
                 .client(builder.build())
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
                 .baseUrl(baseUrl)
                 .build()
         }

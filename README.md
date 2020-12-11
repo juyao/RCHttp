@@ -1,6 +1,3 @@
-# RCHttp
-一个基于Retrofit+kotlin协程的网络请求框架
-
 # RCHttp使用文档
 
 # 集成方式
@@ -20,7 +17,7 @@ allprojects {
 
 ```groovy
 dependencies {
-	        implementation 'com.github.juyao:RCHttp:v1.0.1'
+	        implementation 'com.github.juyao:RCHttp:V1.0.0'
 	}
 ```
 
@@ -161,3 +158,76 @@ class MainActivity : AppCompatActivity() {
 ```
 
 以上是RCHttp的基本用法，更多功能有待完善，敬请期待
+
+# 2020/12/12  新增文件下载功能，并且实时返回进度
+
+同样，先定义Service
+
+```kotlin
+interface DownloadService {
+    @Streaming
+    @GET
+    suspend fun download(@Url url: String?): ResponseBody
+}
+```
+
+> 跟正常接口写法基本一致，需要注意的是要添加@Streaming注解。
+默认情况下，Retrofit在处理结果前会将服务器端的Response全部读进内存。如果服务器端返回的是一个非常大的文件，则容易发生oom。使用@Streaming的主要作用就是把实时下载的字节就立马写入磁盘，而不用把整个文件读入内存
+。
+
+同样ViewModel需要继承ViewModeX,在ViewModel发送下载请求
+
+```kotlin
+fun dowmLoadWZRY(url:String,path:String,fileName:String){
+        dowmLoadFile(path,fileName,{downloadService.download(url)},{
+            Log.i("MainViewModel","请求出现异常：${it.message}")
+        },object :RCDownLoadListener{
+            override fun onStart() {
+                Log.i("MainViewModel","下载开始～～～")
+            }
+
+            override fun onProgress(progress: Int) {
+                Log.i("MainViewModel","下载进度：${progress}")
+            }
+
+            override fun onFinish(path: String?) {
+                Log.i("MainViewModel","下载完成，文件路径：${path}")
+            }
+
+            override fun onFail(errorInfo: String?) {
+                Log.i("MainViewModel","下载出错：${errorInfo}")
+            }
+        })
+    }
+```
+
+Activity里调用就可以了
+
+```kotlin
+viewModel.dowmLoadWZRY("https://imtt.dd.qq.com/16891/apk/B168BCBBFBE744DA4404C62FD18FFF6F.apk?fsname=com.tencent.tmgp.sgame_1.61.1.6_61010601.apk",
+                                   externalCacheDir!!.absolutePath,"王者荣耀.apk")
+```
+
+怎么样，是不是so easy?
+
+这里需要注意的一点就是，因为我这里普通请求跟下载文件用的是同一个retrofit对象，所以一开始设置的30s时间显然不够，这里有几种解决方案
+
+1. 创建两个retrofit对象，分别设置对应的超时时间，普通请求跟下载请求分开用，但是这种方式很不优雅，很难受
+2. 用户自定义拦截器，根据特定链接设置特定超时时间，这种方式对用户来说加大了网络库的使用复杂度，违背了我的初心，另外，项目大了后下载的地址越来越多，不好管理
+3. 最后，痛定思痛，就将超时时间统一设置成了10分钟
+
+```kotlin
+private const val CALL_TIME_OUT = 10L
+        private const val CONNECT_TIME_OUT = 10L
+        private const val READ_TIME_OUT = 10L
+        private const val WRITE_TIME_OUT = 10L
+```
+
+```kotlin
+builder.callTimeout(CALL_TIME_OUT, TimeUnit.MINUTES)
+            builder.connectTimeout(CONNECT_TIME_OUT, TimeUnit.MINUTES)
+            builder.readTimeout(READ_TIME_OUT, TimeUnit.MINUTES)
+            builder.writeTimeout(WRITE_TIME_OUT, TimeUnit.MINUTES)
+```
+
+下载文件到此也基本完成。
