@@ -34,6 +34,14 @@ class MainViewModel: ViewModelX(){
             }
         )
     }
+    fun getBannersForAll(){
+        apiRequest(
+            {service.getBannersForAll()},
+            {
+                Log.i("MainViewModel","请求到Banner数据list：status=${it!!.status},size=${it.data!!.size}")
+            }
+        )
+    }
 
 //    /**
 //     * 获取banner数据

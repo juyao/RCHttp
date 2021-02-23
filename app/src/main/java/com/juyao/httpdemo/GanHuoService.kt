@@ -3,6 +3,7 @@ package com.juyao.httpdemo
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 
 /**
@@ -16,4 +17,7 @@ import retrofit2.http.Path
  interface GanHuoService {
     @GET("api/v2/banners")
     suspend fun getBanners(): HttpResut<List<Banner>>
+
+    @GET("api/v2/banners")
+    suspend fun getBannersForAll(): AllBannerData
 }
