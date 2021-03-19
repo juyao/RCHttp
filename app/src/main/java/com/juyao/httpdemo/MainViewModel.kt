@@ -17,7 +17,7 @@ import com.juyao.http.viewmodel.ViewModelX
 
 class MainViewModel: ViewModelX(){
     val service=ServiceCreator.create(GanHuoService::class.java)
-    val downloadService=ServiceCreator.create(DownloadService::class.java)
+    val downloadService=ServiceCreator.createDownLoadService(DownloadService::class.java)
     val bannerData:MutableLiveData<List<Banner>> = MutableLiveData<List<Banner>>()
     /**
      * 获取banner数据

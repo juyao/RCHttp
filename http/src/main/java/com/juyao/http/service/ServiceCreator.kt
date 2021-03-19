@@ -19,10 +19,10 @@ import java.util.concurrent.TimeUnit
 
 class ServiceCreator {
     companion object{
-        private const val CALL_TIME_OUT = 10L
-        private const val CONNECT_TIME_OUT = 10L
-        private const val READ_TIME_OUT = 10L
-        private const val WRITE_TIME_OUT = 10L
+        private const val CALL_TIME_OUT = 30L
+        private const val CONNECT_TIME_OUT = 30L
+        private const val READ_TIME_OUT = 30L
+        private const val WRITE_TIME_OUT = 30L
         private var baseUrl: String = ""
         private val interceptors: ArrayList<Interceptor> = ArrayList()
         private val networkInterceptors: ArrayList<Interceptor> = ArrayList()
@@ -43,10 +43,10 @@ class ServiceCreator {
             for (networkInterceptor in networkInterceptors) {
                 builder.addNetworkInterceptor(networkInterceptor)
             }
-            builder.callTimeout(CALL_TIME_OUT, TimeUnit.MINUTES)
-            builder.connectTimeout(CONNECT_TIME_OUT, TimeUnit.MINUTES)
-            builder.readTimeout(READ_TIME_OUT, TimeUnit.MINUTES)
-            builder.writeTimeout(WRITE_TIME_OUT, TimeUnit.MINUTES)
+            builder.callTimeout(CALL_TIME_OUT, TimeUnit.SECONDS)
+            builder.connectTimeout(CONNECT_TIME_OUT, TimeUnit.SECONDS)
+            builder.readTimeout(READ_TIME_OUT, TimeUnit.SECONDS)
+            builder.writeTimeout(WRITE_TIME_OUT, TimeUnit.SECONDS)
             val gson = GsonBuilder()
                     .setLenient()
                     .create()
@@ -56,9 +56,34 @@ class ServiceCreator {
                 .baseUrl(baseUrl)
                 .build()
         }
+        private val downLoadfRetrofit: Retrofit by lazy(mode = LazyThreadSafetyMode.SYNCHRONIZED) {
+            val builder = OkHttpClient.Builder()
+            for (interceptor in interceptors) {
+                builder.addInterceptor(interceptor)
+            }
+            for (networkInterceptor in networkInterceptors) {
+                builder.addNetworkInterceptor(networkInterceptor)
+            }
+            builder.callTimeout(CALL_TIME_OUT, TimeUnit.HOURS)
+            builder.connectTimeout(CONNECT_TIME_OUT, TimeUnit.HOURS)
+            builder.readTimeout(READ_TIME_OUT, TimeUnit.HOURS)
+            builder.writeTimeout(WRITE_TIME_OUT, TimeUnit.HOURS)
+            val gson = GsonBuilder()
+                .setLenient()
+                .create()
+            Retrofit.Builder()
+                .client(builder.build())
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .baseUrl(baseUrl)
+                .build()
+        }
         @JvmStatic
         fun <T> create(clazz: Class<T>): T {
             return retrofit.create(clazz)
+        }
+        @JvmStatic
+        fun <T> createDownLoadService(clazz: Class<T>): T {
+            return downLoadfRetrofit.create(clazz)
         }
     }
 }

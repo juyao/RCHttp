@@ -176,6 +176,11 @@ interface DownloadService {
 。
 
 同样ViewModel需要继承ViewModeX,在ViewModel发送下载请求
+创建下载service对象
+
+```kotlin
+val downloadService=ServiceCreator.createDownLoadService(DownloadService::class.java)
+```
 
 ```kotlin
 fun dowmLoadWZRY(url:String,path:String,fileName:String){
@@ -208,26 +213,5 @@ viewModel.dowmLoadWZRY("https://imtt.dd.qq.com/16891/apk/B168BCBBFBE744DA4404C62
                                    externalCacheDir!!.absolutePath,"王者荣耀.apk")
 ```
 
-怎么样，是不是so easy?
-
-这里需要注意的一点就是，因为我这里普通请求跟下载文件用的是同一个retrofit对象，所以一开始设置的30s时间显然不够，这里有几种解决方案
-
-1. 创建两个retrofit对象，分别设置对应的超时时间，普通请求跟下载请求分开用，但是这种方式很不优雅，很难受
-2. 用户自定义拦截器，根据特定链接设置特定超时时间，这种方式对用户来说加大了网络库的使用复杂度，违背了我的初心，另外，项目大了后下载的地址越来越多，不好管理
-3. 最后，痛定思痛，就将超时时间统一设置成了10分钟
-
-```kotlin
-private const val CALL_TIME_OUT = 10L
-        private const val CONNECT_TIME_OUT = 10L
-        private const val READ_TIME_OUT = 10L
-        private const val WRITE_TIME_OUT = 10L
-```
-
-```kotlin
-builder.callTimeout(CALL_TIME_OUT, TimeUnit.MINUTES)
-            builder.connectTimeout(CONNECT_TIME_OUT, TimeUnit.MINUTES)
-            builder.readTimeout(READ_TIME_OUT, TimeUnit.MINUTES)
-            builder.writeTimeout(WRITE_TIME_OUT, TimeUnit.MINUTES)
-```
 
 下载文件到此也基本完成。
