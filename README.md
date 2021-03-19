@@ -17,7 +17,7 @@ allprojects {
 
 ```groovy
 dependencies {
-	        implementation 'com.github.juyao:RCHttp:v1.0.2'
+	        implementation 'com.github.juyao:RCHttp:V1.0.0'
 	}
 ```
 
@@ -26,9 +26,9 @@ dependencies {
 在Application的onCreate方法里进行初始化：
 
 ```kotlin
-ServiceCreator.init("baseurl/",ArrayList(),ArrayList())
+ServiceCreator.init("https://gank.io/",ArrayList(),ArrayList())
 ```
-不要忘了加"/"
+
 后面两个拦截器参数如果不需要自定义，就传两个空数组（非null）
 
 创建实体类，继承ResponseX
@@ -175,12 +175,13 @@ interface DownloadService {
 默认情况下，Retrofit在处理结果前会将服务器端的Response全部读进内存。如果服务器端返回的是一个非常大的文件，则容易发生oom。使用@Streaming的主要作用就是把实时下载的字节就立马写入磁盘，而不用把整个文件读入内存
 。
 
-同样ViewModel需要继承ViewModeX,在ViewModel发送下载请求
-创建下载service对象
+创建下载service对象，这里要注意，要跟创建普通请求对象进行区分，通过createDownLoadService方法创建
 
 ```kotlin
 val downloadService=ServiceCreator.createDownLoadService(DownloadService::class.java)
 ```
+
+同样ViewModel需要继承ViewModeX,在ViewModel发送下载请求
 
 ```kotlin
 fun dowmLoadWZRY(url:String,path:String,fileName:String){
@@ -212,6 +213,5 @@ Activity里调用就可以了
 viewModel.dowmLoadWZRY("https://imtt.dd.qq.com/16891/apk/B168BCBBFBE744DA4404C62FD18FFF6F.apk?fsname=com.tencent.tmgp.sgame_1.61.1.6_61010601.apk",
                                    externalCacheDir!!.absolutePath,"王者荣耀.apk")
 ```
-
 
 下载文件到此也基本完成。
