@@ -1,5 +1,6 @@
 package com.juyao.httpdemo
 
+import androidx.lifecycle.LiveData
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -20,4 +21,7 @@ import retrofit2.http.Query
 
     @GET("api/v2/banners")
     suspend fun getBannersForAll(): AllBannerData
+
+    @GET("api/v2/banners")
+    fun getBannersForLiveData():LiveData<HttpResut<List<Banner>>>
 }

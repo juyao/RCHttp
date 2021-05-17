@@ -1,5 +1,7 @@
 package com.juyao.http.viewmodel
 import android.util.Log
+import android.widget.Toast
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,8 +12,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
-import retrofit2.Call
-import retrofit2.Response
 import java.io.*
 
 
@@ -24,8 +24,8 @@ import java.io.*
 
 
 open class ViewModelX: ViewModel() {
-    var myOnFail: (Throwable) -> Unit={
-
+    open var myOnFail: (Throwable) -> Unit={
+        Log.i("http_fail","请求失败：${it.message}")
     }
      fun <T> apiRequest(
         request: suspend () -> ResponseX<T>?,
@@ -39,7 +39,7 @@ open class ViewModelX: ViewModel() {
                     if(res.getRequestStatus()==0){
                         onSuccess(res.getRequestData())
                     }else{
-                        onFail(Exception("状态值异常"))
+                        onFail(Exception(res.getErrorMsg()))
                     }
                 } else {
                     onFail(Exception("返回值为空"))
@@ -62,7 +62,7 @@ open class ViewModelX: ViewModel() {
                     if(res.getRequestStatus()==0){
                         liveData.value=res.getRequestData()
                     }else{
-                        onFail(Exception("状态值异常"))
+                        onFail(Exception(res.getErrorMsg()))
                     }
                 } else {
                     onFail(Exception("返回值为空"))
@@ -72,6 +72,9 @@ open class ViewModelX: ViewModel() {
             }
         }
     }
+
+
+
     //此方法只适用于下载文件并写入本地
     fun dowmLoadFile(desPath:String,
                      fileName:String="${System.currentTimeMillis()}",

@@ -1,6 +1,7 @@
 package com.juyao.http.service
 
 import com.google.gson.GsonBuilder
+import com.juyao.http.adapter.LiveDataCallAdapterFactory
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -52,6 +53,7 @@ class ServiceCreator {
                     .create()
             Retrofit.Builder()
                 .client(builder.build())
+                .addCallAdapterFactory(LiveDataCallAdapterFactory())
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .baseUrl(baseUrl)
                 .build()
