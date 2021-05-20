@@ -1,10 +1,7 @@
 package com.juyao.http.viewmodel
+
 import android.util.Log
-import android.widget.Toast
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.juyao.http.async.ResponseX
 import com.juyao.http.callback.RCDownLoadListener
 import kotlinx.coroutines.Dispatchers
@@ -23,22 +20,23 @@ import java.io.*
  */
 
 
-open class ViewModelX: ViewModel() {
-    open var myOnFail: (Throwable) -> Unit={
-        Log.i("http_fail","请求失败：${it.message}")
+open class ViewModelX : ViewModel() {
+    open var myOnFail: (Throwable) -> Unit = {
+        Log.i("http_fail", "请求失败：${it.message}")
     }
-     fun <T> apiRequest(
+
+    fun <T> apiRequest(
         request: suspend () -> ResponseX<T>?,
         onSuccess: (T?) -> Unit,
-        onFail:(Throwable) -> Unit=myOnFail
+        onFail: (Throwable) -> Unit = myOnFail
     ): Job {
         return viewModelScope.launch(Dispatchers.Main) {
             try {
                 val res: ResponseX<T>? = withContext(Dispatchers.IO) { request() }
                 if (null != res) {
-                    if(res.getRequestStatus()==0){
+                    if (res.getRequestStatus() == ResponseX.SUCCESS) {
                         onSuccess(res.getRequestData())
-                    }else{
+                    } else {
                         onFail(Exception(res.getErrorMsg()))
                     }
                 } else {
@@ -52,16 +50,16 @@ open class ViewModelX: ViewModel() {
 
     fun <T> apiRequest(
         request: suspend () -> ResponseX<T>?,
-        liveData:MutableLiveData<T>,
-        onFail:(Throwable) -> Unit=myOnFail
+        liveData: MutableLiveData<T>,
+        onFail: (Throwable) -> Unit = myOnFail
     ): Job {
         return viewModelScope.launch(Dispatchers.Main) {
             try {
                 val res: ResponseX<T>? = withContext(Dispatchers.IO) { request() }
                 if (null != res) {
-                    if(res.getRequestStatus()==0){
-                        liveData.value=res.getRequestData()
-                    }else{
+                    if (res.getRequestStatus() == ResponseX.SUCCESS) {
+                        liveData.value = res.getRequestData()
+                    } else {
                         onFail(Exception(res.getErrorMsg()))
                     }
                 } else {
@@ -76,19 +74,21 @@ open class ViewModelX: ViewModel() {
 
 
     //此方法只适用于下载文件并写入本地
-    fun dowmLoadFile(desPath:String,
-                     fileName:String="${System.currentTimeMillis()}",
-                     request:suspend ()-> ResponseBody,
-                     onFail:(Throwable) -> Unit=myOnFail,
-                     listener: RCDownLoadListener):Job{
+    fun dowmLoadFile(
+        desPath: String,
+        fileName: String = "${System.currentTimeMillis()}",
+        request: suspend () -> ResponseBody,
+        onFail: (Throwable) -> Unit = myOnFail,
+        listener: RCDownLoadListener
+    ): Job {
         return viewModelScope.launch(Dispatchers.IO) {
             try {
                 val res: ResponseBody = request()
-                if(res!=null){
+                if (res != null) {
                     //将Response写入到从磁盘中
                     //注意，这个方法是运行在子线程中的
-                    writeResponseToDisk(desPath,fileName,res,listener)
-                }else{
+                    writeResponseToDisk(desPath, fileName, res, listener)
+                } else {
                     onFail(Exception("返回值为空"))
                     listener.onFail("返回值为空")
                 }
@@ -99,13 +99,31 @@ open class ViewModelX: ViewModel() {
             }
         }
     }
-    private  fun writeResponseToDisk(path: String, fileName: String,responseBody: ResponseBody, downloadListener: RCDownLoadListener) {
+
+    private fun writeResponseToDisk(
+        path: String,
+        fileName: String,
+        responseBody: ResponseBody,
+        downloadListener: RCDownLoadListener
+    ) {
         //从response获取输入流以及总大小
-        writeFileFromIS(File("$path${File.separator}$fileName"),responseBody.byteStream(), responseBody.contentLength(), downloadListener)
+        writeFileFromIS(
+            File("$path${File.separator}$fileName"),
+            responseBody.byteStream(),
+            responseBody.contentLength(),
+            downloadListener
+        )
     }
+
     private val sBufferSize = 8192
+
     //将输入流写入文件
-    private  fun writeFileFromIS(file: File, `is`: InputStream, totalLength: Long, downloadListener: RCDownLoadListener) {
+    private fun writeFileFromIS(
+        file: File,
+        `is`: InputStream,
+        totalLength: Long,
+        downloadListener: RCDownLoadListener
+    ) {
         //开始下载
         downloadListener.onStart()
         //创建文件
@@ -118,13 +136,13 @@ open class ViewModelX: ViewModel() {
                 downloadListener.onFail("createNewFile IOException")
             }
         }
-        Log.i("MainViewModel","文件路径：${file.absoluteFile}");
+        Log.i("MainViewModel", "文件路径：${file.absoluteFile}");
         var os: OutputStream? = null
         var currentLength: Long = 0
         try {
             os = BufferedOutputStream(FileOutputStream(file))
             val data = ByteArray(sBufferSize)
-            var len: Int=0
+            var len: Int = 0
             while (`is`.read(data, 0, sBufferSize).also { len = it } != -1) {
                 os.write(data, 0, len)
                 currentLength += len.toLong()
