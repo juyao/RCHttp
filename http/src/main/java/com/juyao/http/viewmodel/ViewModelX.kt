@@ -71,6 +71,27 @@ open class ViewModelX : ViewModel() {
         }
     }
 
+    //直接返回livedata
+    fun <T> apiRequest( request: suspend () -> ResponseX<T>?, onFail: (Throwable) -> Unit = myOnFail):LiveData<T?>{
+        return liveData(Dispatchers.Main){
+            try {
+                val res: ResponseX<T>? = withContext(Dispatchers.IO) { request() }
+                if (null != res) {
+                    if (res.getRequestStatus() == ResponseX.SUCCESS) {
+                        emit(res.getRequestData())
+                    } else {
+                        onFail(Exception(res.getErrorMsg()))
+                    }
+                } else {
+                    onFail(Exception("返回值为空"))
+                }
+            } catch (e: Exception) {
+                onFail(e)
+            }
+
+        }
+    }
+
 
 
     //此方法只适用于下载文件并写入本地

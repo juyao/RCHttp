@@ -53,7 +53,7 @@ class ServiceCreator {
                     .create()
             Retrofit.Builder()
                 .client(builder.build())
-                .addCallAdapterFactory(LiveDataCallAdapterFactory())
+                //.addCallAdapterFactory(LiveDataCallAdapterFactory())
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .baseUrl(baseUrl)
                 .build()

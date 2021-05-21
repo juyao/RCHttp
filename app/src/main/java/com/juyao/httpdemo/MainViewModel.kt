@@ -39,15 +39,10 @@ class MainViewModel : ViewModelX() {
         )
     }
 
-    fun getBannerLiveData(): LiveData<List<Banner>> {
-        return mapHttpResult(service.getBannersForLiveData())
+    fun getBannerLiveData(): LiveData<List<Banner>?> {
+        return apiRequest({service.getBanners()})
     }
 
-    fun <T> mapHttpResult(ori: LiveData<HttpResut<T>>): LiveData<T> {
-        return Transformations.map(
-            ori
-        ) { input -> input?.data }
-    }
 
     fun getBannersForAll() {
         apiRequest(
