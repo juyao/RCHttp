@@ -15,7 +15,7 @@ abstract class ResponseX<T>{
     abstract fun getRequestData():T?
     companion object{
         const val SUCCESS=0
-        const val FAILE=1
+        const val FAILE=-1226
     }
 
 }

@@ -21,14 +21,19 @@ import java.io.*
 
 
 open class ViewModelX : ViewModel() {
-    open var myOnFail: (Throwable) -> Unit = {
-        Log.i("http_fail", "请求失败：${it.message}")
+//    open var myOnFail: (Throwable) -> Unit = {
+//        Log.i("http_fail", "请求失败：${it.message}")
+//    }
+    //open var myOnFail: (Int,Throwable) -> Unit = error
+
+
+    open fun onFail(e:Throwable,code:Int=ResponseX.FAILE){
+        Log.i("http_fail", "请求失败：${e.message}")
     }
 
     fun <T> apiRequest(
         request: suspend () -> ResponseX<T>?,
-        onSuccess: (T?) -> Unit,
-        onFail: (Throwable) -> Unit = myOnFail
+        onSuccess: (T?) -> Unit
     ): Job {
         return viewModelScope.launch(Dispatchers.Main) {
             try {
@@ -37,7 +42,7 @@ open class ViewModelX : ViewModel() {
                     if (res.getRequestStatus() == ResponseX.SUCCESS) {
                         onSuccess(res.getRequestData())
                     } else {
-                        onFail(Exception(res.getErrorMsg()))
+                        onFail(Exception(res.getErrorMsg()),res.getRequestStatus())
                     }
                 } else {
                     onFail(Exception("返回值为空"))
@@ -50,8 +55,7 @@ open class ViewModelX : ViewModel() {
 
     fun <T> apiRequest(
         request: suspend () -> ResponseX<T>?,
-        liveData: MutableLiveData<T>,
-        onFail: (Throwable) -> Unit = myOnFail
+        liveData: MutableLiveData<T>
     ): Job {
         return viewModelScope.launch(Dispatchers.Main) {
             try {
@@ -72,7 +76,7 @@ open class ViewModelX : ViewModel() {
     }
 
     //直接返回livedata
-    fun <T> apiRequest( request: suspend () -> ResponseX<T>?, onFail: (Throwable) -> Unit = myOnFail):LiveData<T?>{
+    fun <T> apiRequest( request: suspend () -> ResponseX<T>?):LiveData<T?>{
         return liveData(Dispatchers.Main){
             try {
                 val res: ResponseX<T>? = withContext(Dispatchers.IO) { request() }
@@ -99,7 +103,6 @@ open class ViewModelX : ViewModel() {
         desPath: String,
         fileName: String = "${System.currentTimeMillis()}",
         request: suspend () -> ResponseBody,
-        onFail: (Throwable) -> Unit = myOnFail,
         listener: RCDownLoadListener
     ): Job {
         return viewModelScope.launch(Dispatchers.IO) {

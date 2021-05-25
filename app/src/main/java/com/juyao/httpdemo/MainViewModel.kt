@@ -31,13 +31,11 @@ class MainViewModel : ViewModelX() {
             {
                 service.getBanners()
             },
-            bannerData,
-            {
-                //这里自行处理异常
-                Log.i("MainViewModel", "请求出现异常：${it.message}")
-            }
+            bannerData
         )
     }
+
+
 
     fun getBannerLiveData(): LiveData<List<Banner>?> {
         return apiRequest({service.getBanners()})
@@ -72,10 +70,13 @@ class MainViewModel : ViewModelX() {
 //        )
 //    }
 
+    override fun onFail(e: Throwable, code: Int) {
+        super.onFail(e, code)
+
+    }
+
     fun dowmLoadWZRY(url: String, path: String, fileName: String) {
-        dowmLoadFile(path, fileName, { downloadService.download(url) }, {
-            Log.i("MainViewModel", "请求出现异常：${it.message}")
-        }, object : RCDownLoadListener {
+        dowmLoadFile(path, fileName, { downloadService.download(url) }, object : RCDownLoadListener {
             override fun onStart() {
                 Log.i("MainViewModel", "下载开始～～～")
             }

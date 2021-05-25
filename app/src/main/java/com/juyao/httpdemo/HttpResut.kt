@@ -19,7 +19,7 @@ import com.juyao.http.async.ResponseX
         return if(status==100){
             ResponseX.SUCCESS
         }else{
-            ResponseX.FAILE
+            status
         }
     }
 
