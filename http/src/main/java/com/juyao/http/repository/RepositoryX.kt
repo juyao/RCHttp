@@ -7,7 +7,7 @@ import com.juyao.http.async.ResponseX
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class RepositoryX {
+open class RepositoryX {
     //直接返回livedata
     fun <T> apiRequest( request: suspend () -> ResponseX<T>?): LiveData<T?> {
         return liveData(Dispatchers.Main){
